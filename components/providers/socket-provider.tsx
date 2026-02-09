@@ -22,7 +22,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetch("/api/socket/io");
 
-    const socketInstance = io({
+    const socketInstance = io(process.env.NEXT_PUBLIC_SITE_URL!,{
       path: "/api/socket/io",
     });
 
