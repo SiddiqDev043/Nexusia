@@ -6,7 +6,11 @@ import { currentProfile } from "@/lib/current-profile";
 import { currentAccount } from "@/lib/current-account";
 import { db } from "@/lib/db";
 
-export async function PATCH(req: Request, { params }: { params: { serverId: string } }) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ serverId: string }> }
+) {
+  const { serverId } = await params; 
   const profile = await currentProfile();
   const account = await currentAccount();
 
@@ -17,14 +21,18 @@ export async function PATCH(req: Request, { params }: { params: { serverId: stri
   const { name, imageUrl } = await req.json();
 
   const server = await db.server.update({
-    where: { id: params.serverId, profileId: profile.id },
+    where: { id: serverId, profileId: profile.id },
     data: { name, imageUrl },
   });
 
   return NextResponse.json(server);
 }
 
-export async function DELETE(req: Request, { params }: { params: { serverId: string } }) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ serverId: string }> } 
+) {
+  const { serverId } = await params; 
   const profile = await currentProfile();
   const account = await currentAccount();
 
@@ -33,7 +41,7 @@ export async function DELETE(req: Request, { params }: { params: { serverId: str
   }
 
   const server = await db.server.delete({
-    where: { id: params.serverId, profileId: profile.id },
+    where: { id: serverId, profileId: profile.id },
   });
 
   return NextResponse.json(server);

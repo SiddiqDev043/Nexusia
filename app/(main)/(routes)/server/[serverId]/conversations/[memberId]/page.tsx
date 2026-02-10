@@ -12,17 +12,19 @@ interface MemberIdPageProps {
   params: Promise<{
     memberId: string;
     serverId: string;
-  }>,
-  searchParams: {
+  }>;
+  searchParams?: Promise<{
     video?: boolean;
-  }
+  }>;
 }
 
 const MemberIdPage = async ({ 
   params,
   searchParams,
 }: MemberIdPageProps) => {
+
   const { serverId, memberId } = await params; 
+  const sp = await searchParams;
 
   const profile = await currentProfile();
   if (!profile) 
@@ -55,14 +57,14 @@ const MemberIdPage = async ({
         serverId={serverId}
         type="conversation"
       />
-      {searchParams.video && (
+      {sp?.video && (
         <MediaRoom
           chatId={conversation.id}
           video={true}
           audio={true}
         />
       )}
-      {!searchParams.video && (
+      {!sp?.video && (
         <>
           <ChatMessages
             member={currentMember}
@@ -87,7 +89,6 @@ const MemberIdPage = async ({
           />
         </>
       )}
-      
     </div>
   );
 };

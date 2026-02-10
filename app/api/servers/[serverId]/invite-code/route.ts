@@ -10,9 +10,11 @@ import { db } from "@/lib/db";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { serverId: string } }
+  { params }: { params: Promise<{ serverId: string }> }
 ) {
   try {
+    const { serverId } = await params; // WAJIB
+
     const profile = await currentProfile();
     const account = await currentAccount();
 
@@ -27,7 +29,7 @@ export async function PATCH(
 
     const server = await db.server.update({
       where: {
-        id: params.serverId,
+        id: serverId,
         profileId: profile.id,
       },
       data: {

@@ -3,13 +3,13 @@ import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
 
 interface ServerIdPageProps {
-  params: {
+  params: Promise<{
     serverId: string;
-  };
+  }>;
 }
 
 const ServerIdPage = async ({ params }: ServerIdPageProps) => {
-  const { serverId } = params;
+  const { serverId } = await params; 
 
   const profile = await currentProfile();
 
