@@ -12,16 +12,18 @@ const MainPage = async () => {
   const server = await db.server.findFirst({
     where: {
       members: {
-        some: { profileId: profile.id }
-      }
-    }
+        some: {
+          profileId: profile.id,
+        },
+      },
+    },
   });
 
   if (server) {
     redirect(`/server/${server.id}`);
   }
 
-  redirect("/"); 
+  redirect("/setup");
 };
 
 export default MainPage;
