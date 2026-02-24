@@ -1,0 +1,109 @@
+flowchart TD
+  %% Client & UI
+  subgraph Client
+    U[User]
+    UIAuth[Auth UI sign-in / sign-up]
+    UISetup[Onboarding / Profile]
+    UIMain[Main App servers, channels, DMs]
+    ChatHeader[ChatHeader]
+    ChatMessages[ChatMessages]
+    ChatInput[ChatInput]
+    SocketInit[socket-init.tsx]
+  end
+
+  %% Auth APIs & flows
+  subgraph AuthAPI
+    ReqOTP[api/auth/request-otp]
+    VerifyOTP[api/auth/verify-otp]
+    CompleteAuth[api/auth/complete]
+    CheckNPM[api/auth/check-npm]
+    ProfileCreate[api/profile/create]
+    ProfileEnsure[api/profile/ensure]
+  end
+
+  %% Role, DB, and Policies
+  subgraph Backend
+    PrismaDB[(Prisma DB)]
+    RoleSvc[Role Assignment & Verification]
+    ServersAPI[api/servers/*]
+    ChannelsAPI[api/channels/*]
+    MessagesAPI[api/messages]
+    MembersAPI[api/members/*]
+    UploadAPI[api/uploadthing/*]
+    LivekitAPI[api/livekit/*]
+    TestEnv[api/test-env]
+  end
+
+  %% Hooks & Real-time
+  subgraph Hooks
+    useChatSocket[useChatSocket]
+    useChatQuery[useChatQuery]
+    useChatScroll[useChatScroll]
+  end
+
+  %% Flows: Authentication & setup
+  U --> UIAuth
+  UIAuth --> ReqOTP
+  ReqOTP -->|sends OTP to user email/phone| U
+  U -->|submits OTP| VerifyOTP
+  VerifyOTP -->|valid? create session token| CompleteAuth
+  VerifyOTP -->|if fails| UIAuth
+
+  %% check-npm and additional verification
+  CompleteAuth --> CheckNPM
+  CheckNPM -->|npm verified?| RoleSvc
+  CheckNPM -->|npm not verified| UISetup
+  RoleSvc -->|determine role owner/admin/member/guest| ProfileEnsure
+  ProfileEnsure -->|profile exists?| UIMain
+  ProfileEnsure -->|no profile| ProfileCreate
+  ProfileCreate --> UIMain
+
+  %% Role-based access gating
+  UIMain -->|access servers/channels| ServersAPI
+  RoleSvc -->|enforce access| ServersAPI
+  RoleSvc -->|enforce access| ChannelsAPI
+  RoleSvc -->|enforce access| MessagesAPI
+
+  %% Server / Channel actions
+  UIMain --> ServersAPI
+  ServersAPI --> PrismaDB
+  ServersAPI -->|invite/create/leave| MembersAPI
+  MembersAPI --> PrismaDB
+
+  ChannelsAPI --> PrismaDB
+  MessagesAPI --> PrismaDB
+
+  %% Messaging & Upload flow REST + Socket
+  ChatInput -->|POST message or file| MessagesAPI
+  ChatInput -->|upload file| UploadAPI
+  UploadAPI -->|returns file metadata| MessagesAPI
+  MessagesAPI -->|persist| PrismaDB
+  MessagesAPI -->|emit via socket| useChatSocket
+
+  %% Socket lifecycle
+  SocketInit --> useChatSocket
+  useChatSocket -->|join room| ChannelsAPI
+  useChatSocket -->|subscribe events| ChatMessages
+  MessagesAPI -->|socket emit message:new| ChatMessages
+  ChatMessages --> useChatScroll
+
+  %% LiveKit / Video
+  ChatHeader --> LivekitAPI
+  LivekitAPI -->|token| Client
+  LivekitAPI --> PrismaDB
+
+  %% Direct messages
+  UIMain --> MessagesAPI
+  MessagesAPI -->|DMs| PrismaDB
+
+  %% Test & env routes
+  UIMain --> TestEnv
+
+  %% Database / audit
+  PrismaDB -->|stores users, profiles, roles, servers, channels, messages, uploads| RoleSvc
+
+  %% Notes & decision points styled
+  classDef decision fill:#fff7c2,stroke:#b8860b,stroke-width:1px;
+  CheckNPM:::decision
+  VerifyOTP:::decision
+  ProfileEnsure:::decision

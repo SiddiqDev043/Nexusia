@@ -20,8 +20,8 @@ async function main() {
     update: {},
     create: {
       npm: "2214373010",
-      email: "kristiyanronaldo500@gmail.com",
-      role: MemberRole.DOSEN,
+      email: "damarprasetiyo04@gmail.com",
+      role: MemberRole.ADMIN,
     },
   });
 
@@ -32,6 +32,16 @@ async function main() {
       npm: "2214373012",
       email: "kumpultugas865@gmail.com",
       role: MemberRole.MAHASISWA,
+    },
+  });
+
+   await prisma.account.upsert({
+    where: { npm: "2214373062" },
+    update: {},
+    create: {
+      npm: "2214373062",
+      email: "reyhanmohammed74@gmail.com",
+      role: MemberRole.DOSEN,
     },
   });
 
