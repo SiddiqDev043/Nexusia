@@ -3,6 +3,8 @@ import { MemberRole, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.account.deleteMany();
+
   await prisma.account.upsert({
     where: { npm: "2214373011" },
     update: {
@@ -35,7 +37,7 @@ async function main() {
     },
   });
 
-   await prisma.account.upsert({
+  await prisma.account.upsert({
     where: { npm: "2214373062" },
     update: {},
     create: {
