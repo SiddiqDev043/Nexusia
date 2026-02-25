@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Member, MemberRole, Profile } from "@prisma/client";
 import { Edit, FileIcon, ShieldAlert, ShieldCheck, Trash } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 
 import { UserAvatar } from "@/components/user-avatar";
@@ -61,10 +61,37 @@ export const ChatItem = ({
     socketUrl,
     socketQuery
 }: ChatItemProps) => {
+
     const [isEditing, setIsEditing] = useState(false);
+
+    const [showActions, setShowActions] = useState(false);
+    const pressTimer = useRef<NodeJS.Timeout | null>(null);
+
     const { onOpen } = useModal();
     const params = useParams();
     const router = useRouter();
+
+    const handleTouchStart = () => {
+        pressTimer.current = setTimeout(() => {
+            setShowActions(true);
+        }, 500);
+    };
+
+    const handleTouchEnd = () => {
+        if (pressTimer.current) {
+            clearTimeout(pressTimer.current);
+            pressTimer.current = null;
+        }
+    };
+
+    useEffect(() => {
+        if (showActions) {
+            const timer = setTimeout(() => {
+                setShowActions(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showActions]);
 
     const onMemberClick = () => {
         if (member.id === currentMember.id) {
@@ -149,13 +176,19 @@ export const ChatItem = ({
 
     return (
         <div className="relative w-full px-4 py-1">
-            <div className="group relative flex gap-x-4 items-start w-full rounded-xl p-3 transition-all duration-200 hover:bg-zinc-200/40 dark:hover:bg-zinc-900/40 hover:backdrop-blur-[2px]">
+            <div
+                className="group relative flex gap-x-4 items-start w-full rounded-xl p-3 transition-all duration-200 hover:bg-zinc-200/40 dark:hover:bg-zinc-900/40 hover:backdrop-blur-[2px]"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+                onClick={() => setShowActions(false)}
+            >
                 <div onClick={onMemberClick} className="shrink-0 pt-0.5">
                     <UserAvatar
                         src={member.Profile.imageUrl}
                         className="ring-1 ring-green-400/40 group-hover:ring-green-400/70 transition"
                     />
                 </div>
+
                 <div className="flex flex-col w-full min-w-0">
                     <div className="flex items-center justify-between gap-x-2">
                         <div className="flex items-center gap-x-2 min-w-0">
@@ -175,6 +208,7 @@ export const ChatItem = ({
                             {timestamp}
                         </span>
                     </div>
+
                     {isImage && imageUrl && (
                         <a
                             href={imageUrl}
@@ -190,6 +224,7 @@ export const ChatItem = ({
                             />
                         </a>
                     )}
+
                     {isPDF && imageUrl && (
                         <div className="relative inline-flex w-fit items-center gap-2 p-3 mt-2 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                             <FileIcon className="h-10 w-10 text-green-500" strokeWidth={2.2} />
@@ -203,6 +238,7 @@ export const ChatItem = ({
                             </a>
                         </div>
                     )}
+
                     {!fileUrl && !isEditing && (
                         <p className={cn(
                             "text-sm text-zinc-600 dark:text-zinc-300",
@@ -216,6 +252,7 @@ export const ChatItem = ({
                             )}
                         </p>
                     )}
+
                     {!fileUrl && isEditing && (
                         <Form {...form}>
                             <form 
@@ -249,8 +286,16 @@ export const ChatItem = ({
                         </Form>
                     )}
                 </div>
+
                 {(canDeleteMessage || canEditMessage) && (
-                <div className="hidden group-hover:flex items-center gap-x-2 absolute p-1 -top-2 right-2 bg-white dark:bg-zinc-800 border rounded-sm">
+                <div
+                    className={cn(
+                        "items-center gap-x-2 absolute p-1 -top-2 right-2 bg-white dark:bg-zinc-800 border rounded-sm",
+                        showActions
+                          ? "flex"
+                          : "hidden md:flex md:group-hover:flex"
+                    )}
+                >
                     {canEditMessage && (
                         <ActionTooltip label="Edit">
                             <div className="p-1 rounded cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-700 transition">
@@ -273,7 +318,7 @@ export const ChatItem = ({
                         </div> 
                     </ActionTooltip>
                 </div>
-            )}
+                )}
             </div>
         </div>
     );
