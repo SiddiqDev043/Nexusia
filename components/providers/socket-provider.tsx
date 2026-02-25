@@ -22,16 +22,23 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetch("/api/socket/io");
 
-    const socketInstance = io(process.env.NEXT_PUBLIC_SITE_URL!,{
+    const socketInstance = io({
       path: "/api/socket/io",
+      transports: ["websocket", "polling"],
     });
 
     socketInstance.on("connect", () => {
+      console.log("Socket connected");
       setIsConnected(true);
     });
 
     socketInstance.on("disconnect", () => {
+      console.log("Socket disconnected");
       setIsConnected(false);
+    });
+
+    socketInstance.on("connect_error", (err) => {
+      console.log("Socket error:", err);
     });
 
     setSocket(socketInstance);
