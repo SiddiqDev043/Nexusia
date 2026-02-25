@@ -58,9 +58,11 @@ export const NavigationItem = ({
                 )}>
                     {parsedImageUrl && (
                         <Image
-                            fill
                             src={parsedImageUrl}
                             alt={name}
+                            width={48}
+                            height={48}
+                            className="object-cover w-full h-full"
                         />
                     )}
                 </div>

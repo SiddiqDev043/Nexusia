@@ -217,10 +217,12 @@ export const ChatItem = ({
                             className="relative aspect-square rounded-md mt-2 overflow-hidden border flex items-center bg-secondary h-48 w-48"
                         >
                             <Image
+                                key={imageUrl}
                                 src={imageUrl}
                                 alt={content}
-                                fill
-                                className="object-cover"
+                                width={192}
+                                height={192}
+                                className="object-cover w-full h-full"
                             />
                         </a>
                     )}
