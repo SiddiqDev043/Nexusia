@@ -16,10 +16,10 @@ async function main() {
   });
 
   await prisma.account.upsert({
-    where: { npm: "2214373010" },
+    where: { npm: " 0109047701" },
     update: {},
     create: {
-      npm: "2214373010",
+      npm: " 0109047701",
       email: "suhe.c2020@gmail.com@gmail.com",
       role: MemberRole.ADMIN,
     },
