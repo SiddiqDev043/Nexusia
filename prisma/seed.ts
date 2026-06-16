@@ -20,7 +20,7 @@ async function main() {
     update: {},
     create: {
       npm: " 0109047701",
-      email: "suhe.ce2020@gmail.com@gmail.com",
+      email: "suhe.c2020@gmail.com",
       role: MemberRole.ADMIN,
     },
   });
