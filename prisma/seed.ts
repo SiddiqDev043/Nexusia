@@ -35,13 +35,33 @@ async function main() {
     },
   });
 
-   await prisma.account.upsert({
-    where: { npm: "2214373062" },
+  await prisma.account.upsert({
+    where: { npm: "2214373015" },
     update: {},
     create: {
-      npm: "2214373062",
-      email: "reyhanmohammed74@gmail.com",
+      npm: "2214373015",
+      email: "emailbaruku11223344@gmail.com",
       role: MemberRole.DOSEN,
+    },
+  });
+
+  await prisma.account.upsert({
+    where: { npm: "2214373017" },
+    update: {},
+    create: {
+      npm: "2214373017",
+      email: "kristiyanronaldo500@gmail.com",
+      role: MemberRole.ADMIN,
+    },
+  });
+
+   await prisma.account.upsert({
+    where: { npm: "2214373018" },
+    update: {},
+    create: {
+      npm: "2214373018",
+      email: "jangandipake982@gmail.com",
+      role: MemberRole.MAHASISWA
     },
   });
 
